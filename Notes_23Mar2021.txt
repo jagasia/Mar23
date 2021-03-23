@@ -1,0 +1,642 @@
+Spring
+	EJB was very complicated and developers felt like winter
+	Developers were looking for framework which they can feel lik Spring
+
+How spring will help us.
+If you remember the jdbc code we wrote
+
+	Connection con=DriverManager.getConnection();
+	Statement st=con.createStatement();
+	ResultSet rs=st.executeQuery();
+
+but look at the code.
+	We have not created any objects using "new" operator.
+
+we obtained the objects returned by some methods.
+
+Amazon
+	we can easily create such applications. THey will work fine when less no of users access
+
+	When very large volume of transactions happen, what is the problem?
+
+The problem is "Bean management" or life cycle management.
+
+If we create 1 object of Bean (imagine a Dao as bean) for 1 user.
+	Then crore users access our application, then crore objects are needed
+
+The issue here is life cycle management of Bean
+	An applicable is "Scalable" if it can handle "growing" or "reducing" complexities
+
+1) we do not want to create objects of Bean using "new" operator.
+
+What is the life cycle management of Bean?
+	construction
+		passivate
+		activate
+	destruction
+
+compare this with our windows task bar
+	lot of applications are open.
+	
+	suddenly if i click any application, sometimes it show "Not responding"
+
+	WHat is the problem in keeping all apps open?	They are in RAM. that is the problem
+	if they are in hard disk there is no problem
+	if we keep lot of applications open always, windows do something called
+		passivation
+		and 
+		activation
+
+	passivation?
+		create a temp file and store all the content in that temp file in secondary storage. Destroy the instance in memory, but keep only the icon in the task bar
+
+	suddenly if you  click that icon in task bar, what happens?
+	activation?
+		create a new instance of the app and fill with the data from temp file and show the user as if it was always open
+
+	
+	construction
+		passivate
+		activate
+	destruction
+This is what one of the services in "Bean Management"
+This was done by EJB
+	How Enterprise Java Bean is different from a Java Bean?
+		Java Bean + some services		is EJB
+
+	what are those services?
+		Life cycle management
+		Security
+		Transaction management
+		Logging
+
+	etc, etc
+
+Now, the same is provided by Spring
+
+We need a bean
+what is a bean?
+	Dao is good example for Bean
+
+Spring has a container that providees all the services we discussed earlier.
+	We are not going to create an object of Bean.	
+	Rather, we obtain an object from Spring container
+
+
+1) add jar files
+2) create a bean.xml file
+	configure the bean
+3) obtain the bean instance using 
+	getBean method
+
+
+by default, the bean we configure becomes, singleton
+	Singlton means?
+		there exists only 1 instance for the bean
+
+Opposite to singleton is "prototype"
+
+if scope is not specified, 
+	then the bean is a singleton bean (only 1 instance)
+
+use scope as "prototype"
+	then every time we get Bean, it is a different instance
+
+
+------------------------
+We are able to change the properties of Customer
+	like Ramesh changed to Rajesh
+If you consider
+	Customer as a Bean class
+		and firstName as a dependency,
+
+	the dependency is not hard coded, it is injected from bean.xml
+
+This is like,
+	when i purchase a car, the audio system is not tightly coupled with the car. I can replace the audio system with another.
+
+Task:
+	create a bean 
+		Mathematics.java
+			no1, no2 as Integer
+		method:		sum()		without any arguments. The sum returns no1+no2;
+
+	add dependencies.
+		configure the Mathematics as "maths" in bean.xml
+		and supply values for no1 and no2
+
+	App.java
+		get bean using "maths"
+		and just call the sum() method
+
+----------------------------------------------------------------------------------
+        <springframework.version>4.3.6.RELEASE</springframework.version>
+
+
+
+		          <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+
+--------------------------------------
+Task:
+	Customer
+		customerId
+		firstName
+		lastName
+		address (Address)
+
+	Address
+		doorNo
+		street
+		city
+		pincode
+
+   <bean id = "cust" class = "mla.mar_23_spring_2.model.Customer" scope="prototype">
+      <property name = "customerId" value = "1"/>
+      <property name="firstName" value="Rajesh" />
+      <property name="lastName" value="Kanna" />
+      <property name="address" ref="a1" />
+   </bean>
+
+Obtain the customer instance and display
+Obtain the address instance and change the street
+display the customer
+
+change the scope to	singleton and	prototype
+and observe the difference
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns = "http://www.springframework.org/schema/beans"
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:p="http://www.springframework.org/schema/p" 
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+   <bean id = "cust" class = "mla.mar_23_spring_2.model.Customer" p:customerId="1" p:firstName="Rajesh" p:lastName="Kanna">
+      <property name="address" ref="a1" />
+   </bean>
+
+   <bean id = "a1" class = "mla.mar_23_spring_2.model.Address" p:doorNo="124-A" p:street="Raja street">
+      <property name="city" value="Coimbatore" />
+      <property name="pincode" value="641002" />
+   </bean>
+</beans>
+
+-----------------------
+In design patterns
+	creational pattern provides suggestions on how to create instances
+		Factory pattern
+
+XML based configuration
+
+Dependency Injection
+	Customer object was dependent on Address object
+	We were able to inject address object into customer using a configuration file
+
+Now why? why it is injected in configuration file?
+	because, we do not want to tightly couple the dependency.
+
+
+class Car
+{
+	Sony obj;
+}
+
+class Car
+{
+	Bosch obj;
+}
+
+In the above 2 examples,
+
+	The car was either tightly coupled with Sony 
+	or
+	Bosch
+
+Think about loosely coupling: like below
+
+class Car
+{
+	Audio obj;		//Audio is an interface
+}
+
+Audio is an interface that allows either
+	Sony
+	or
+	Bosch
+
+The customer's choice
+now,
+	audio can be any audio that implements "Audio" interface
+
+We can inject
+	sony or bosh or any type of audio for "obj"
+
+The car does not come with a rigid idea "sony" or "bosch"
+
+rather, the choice is given to the user 
+in xml file
+
+you can inject any audio that is supported
+
+This way, we are doing "Inversion of Control" ie., the control is given to the user. Not by the creator
+
+
+Activity:
+	understand the concepts of 
+	DI		(Dependency Injection)
+	IOC		(Inversion of Control)
+
+
+Interface Audio
+classes
+	Sony
+	Bosch
+
+	both of them implements Audio interface
+
+in Car class
+	
+
+Dependency Injection is done in 2 ways:
+	constructor based injection
+	setter based injection
+
+
+public class Car {
+	private String name;
+	private Audio audio;		//loosely coupling (Sony / Bose)
+	
+	public Car() {}
+
+	public Car(String name, Audio audio) {			//constructor based injection
+		super();
+		this.name = name;
+		this.audio = audio;
+	}
+
+	public void setAudio(Audio audio) {			//setter based injection
+		this.audio = audio;
+	}
+
+---------------------------
+1) instead of defining in bean.xml file
+	we can use annotation
+what annotation?
+	for class,
+		@Component
+	for methods,
+		@Bean 
+
+By adding a @Component annotation, we have declared that this class is a bean (similar to defining in a bean.xml)
+
+
+2) in our example, the Car is the @Component
+	and audio is the dependency.
+
+	@Autowired annotation is used to make spring automatically detect the bean (@Component) which is matching with the dependency name
+
+In our example, 
+	the dependency is "audio".	(an interface)
+	But there are 2 classes which implements audio, then there is a confusion
+
+	When Sony only has @Component annotation, and When Bose do not have @Component annotation,
+	there was no issue.	Because, only 1 bean qualifies to be injected to car bean.
+
+But both Sony and Bose are defined as @Component (bean), then there are 2 classes qualifiying for one dependency
+
+So use @Qualifier annotation to specify which (among Sony and Bose) should be injected
+
+
+	@Autowired
+	@Qualifier("bose")
+	private Audio audio;
+---------------------------------------------------------
+
+
+autowiring is 
+	auto wired by type
+	auto wired by name
+
+------------------------------------------
+
+-----------------
+
+Reminder 	
+	Auto wire by name 	(xml)
+
+
+
+
+BO
+	datasource;			//loosely coupled with either JdbcTemplate or HibernateTemplate
+Dao
+	JdbcTemplate
+	HibernateTemplate
+
+
+Aggregation and Composition
+Aggregation is a relationship between 2 classes, where 2 classes can exist independently and also 1 becomes a part of another
+Composition is a relationship where 1 will not exist independently but as a part of another only
+
+Task:
+create a new maven project.
+
+1) Sony class	(@Component)
+2) Car class	(@Component)
+	car has a dependency called Sony
+	
+use @Autowired annotation for the dependency
+
+check when we obtain the car instance, the sony instance is automatically injected by spring container.
+
+
+Task:
+	in the  same project (where  you have Car and Sony)
+	add one interface "Audio" 	with a method "play"
+	add one more bean 
+		Bose	implements "Audio"
+	use @Component annotation
+
+In car class,
+	change the Sony into Audio 
+		@Autowired
+		Audio audio
+
+Now, audio is an interface. But spring container automatically injects the Bose instance into the car.
+
+----------------------
+Task
+	now make sony also implement audio interface
+
+Now run the program and see the error
+	expected single matching bean but found 2: bose,sony
+
+
+Solve this error using qualifier as follows:
+	
+	@Autowired
+	@Qualifier("bose")
+	private Audio audio;
+	
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns = "http://www.springframework.org/schema/beans"
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="car" class="mla.mar_23_autowire.model.Car" autowire="byType">
+		<property name="name" value="Maruti" />
+		<!-- <property name="audio" ref="sony" /> -->
+	</bean>
+
+	<bean id="sony" class="mla.mar_23_autowire.model.Sony" primary="true">
+	</bean>
+	
+	<bean id="bose" class="mla.mar_23_autowire.model.Bose">
+	</bean>
+	
+</beans>
+
+When there are more than 1 qualifying beans for dependency, 
+	primary=true
+is used to make 1 bean qualify to be the dependency
+
+--------------------------------------------------
+Spring AOP
+	Aspect Oriented Programming
+
+	to handle cross cutting concerns
+
+Bean is meant to provide business service.
+	ex:	
+		withdraw()
+
+	before withdraw
+	after withdraw
+
+there are something to be done
+
+Take this withdraw as an example:
+	tell me what are the things before "withdraw" should happen?
+	1) validate the card
+	2) validate the pin
+	3) check balance in a/c
+	4) check available cash in machine
+	etc
+
+	tell me what are the things after withdraw should happen?
+	1) check the outcome and commit or rollback
+	2) print receipt if preferred
+	etc
+
+there are many tasks before and after certain methods
+	not all methods. certain methods
+
+	some tasks to be performed before method 1 and 3
+	some " 	"		"	  method 2 and 3
+
+
+In AOP,
+	JoinPoint
+	Pointcut expression	(use symbols like * to define what are all the methods to be adviced)
+	Advice			(a method in Aspect is an advice)
+
+You are allowing some other enterprise to call your "withdraw" method.
+	if you call withdraw, you will follow before and after tasks
+but they may not do
+	so let them call "withdraw",
+our AOP will take care of before and after tasks
+
+Does this reminds you the filter??? (servlet)
+Even in junit we saw 
+	After
+	AfterClass 	annotations???
+
+
+	
+1) dependencies for AOP
+2) bean.xml
+	we need to configure AOP
+  <dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+    <version>5.2.7.RELEASE</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context-support</artifactId>
+    <version>5.2.7.RELEASE</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-aop</artifactId>
+    <version>5.2.7.RELEASE</version>
+</dependency>
+<dependency>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjrt</artifactId>
+    <version>1.9.5</version>
+</dependency>
+<dependency>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjweaver</artifactId>
+    <version>1.9.5</version>
+</dependency>
+
+------------------------------------------------------------------------------
+1) pom.xml, add dependencies
+2) create a bean class
+3) in bean.xml,
+	configure the bean
+
+We have created a bean called
+	Bank
+		withdraw	(is the method)
+
+out point cut expression * mla.mar_23_aop_1.*.*(..)
+	defines that the Aspect (logging) should advice any method of any class with any return type inside the specified package 
+
+this expression is executed using
+	execution method
+		execution(* model.*.*(..))
+
+
+
+Task:
+	Create a bean "Bank"
+	method:	
+		withdraw
+		deposit
+
+	Create an aspect "Logging"
+		before()
+		after()
+
+	create a point cut expression that matches all methods of all classes in your package
+	call withdraw and deposit from App.java main method
+
+----------------------------------------------------------------
+Let us create a new project
+	and implement aspect using annotations
+
+package mla.mar_23_aop_annotations;
+
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@EnableAspectJAutoProxy
+@Component
+public class MyAspect {
+	@Pointcut("execution(* mla.mar_23_aop_annotations.*.*(..))")
+	public void selectAll()
+	{
+		
+	}
+	
+	@Before("selectAll()")
+	public void validatePin()
+	{
+		System.out.println("Before: validating the pin");
+	}
+	
+	@After("selectAll()")
+	public void dispenseCash()
+	{
+		System.out.println("After: remember to collect the cash");
+	}
+}
+------------------------------------------------------------------------------
+TasK:
+	Create a class "ConnectionFactory"
+	with properties 
+		driver, url, username, password
+
+	create a method "getConnection" that returns the connection
+
+	configure this class as a bean in bean.xml file
+	and set the property values
+
+	in App. java
+		obtain the bean and call the get connection.
+		Retrieve data from a table in the db.
+-------------------------------------------------------------------
+Spring Jdbc
+	spring provides easy implementation of jdbc methods using Spring Jdbc
+
+add the below dependency in addition to ojdbc, and spring context
+
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-jdbc</artifactId>
+    <version>5.2.7.RELEASE</version>
+</dependency>
+
+
+Task:
+	Configure the following beans in bean.xml file:
+		DriverManagerDataSource
+		JdbcTemplate
+
+	obtain the jdbc template bean instance from ioc container
+	and execute a DDL statement and check db
+
+-----------------------------------------------
+methods in JdbcTemplate:
+	update			(INSERT/UPDATE/DELETE)
+	queryForObject		(SELECT query with Primary key as condition)
+	query			(SELECT query that returns multiple rows)
+
+
+For select queries, we need to create a RowMapper implementation class
+
+
+when you run a select query? what do you expect?
+	result
+how to store the result in a variable?
+	one row can be stored in an object of entity class.
+	multiple rows can be stored in an arraylist.
+So to store the result of a query on Branch table,
+we need Branch class
+
+
+Why we need a row mapper?
+	row mapper helps spring jdbc template to map the query result to the branch class properties
+
+
+ApplicationContext ctx=new ClassPathXmlApplicationContext("bean.xml");
+        JdbcTemplate jt=(JdbcTemplate) ctx.getBean("jt");
+        //jt.execute("CREATE TABLE DUMMY103(SNO INT)");
+//        jt.update("INSERT INTO Branch VALUES (?,?,?)","B00016","Vasantha nagar","Madurai");
+        	
+//        Branch branch = jt.queryForObject("SELECT * FROM Branch WHERE bid=?", new BranchRowMapper(),"B00014");
+//        System.out.println(branch);
+        
+        List<Branch> result = jt.query("select * from Branch where bcity=?", new BranchRowMapper(),"Delhi");
+        
+        for(Branch b : result)
+        	System.out.println(b);
+
+        System.out.println("Check...");
+
+-----------------------------------
+1) Project team details	
+2) Project titles
+
+Each team must be 5 members
